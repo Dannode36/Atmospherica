@@ -48,6 +48,9 @@ vec3 SimpleRayMarchFog(vec2 texCoord){
     if(rayLength > 500.0){
         return SimpleFog(texCoord);
     }
+    else if(rayLength < 1){
+        return vec3(0.0);
+    }
 
     // divide the steps evenly along the ray length
     float stepSize = rayLength / fogSteps;
