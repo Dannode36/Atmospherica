@@ -4,12 +4,13 @@
 #define TONEMAP 2 //[0 1 2 3]
 #endif
 
-#include "lib/postprocessing/tonemappers.glsl"
-
 varying vec2 texCoord;
 uniform sampler2D colortex0;
 
-#define Saturation 1.10
+#include "lib/postprocessing/tonemappers.glsl"
+#include "lib/postprocessing/bloom.glsl"
+
+#define Saturation 1.00
 #define Vibrance 1.00
 
 vec3 colorSaturation(vec3 x){
@@ -29,12 +30,15 @@ vec3 colorSaturation(vec3 x){
 }
 
 #define Exposure 1.1
-#define ExtraBrightness 0.05
+#define ExtraBrightness 0.04
 
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
-    color *= Exposure;
-    color += ExtraBrightness;
+
+    color = bloom(texCoord);
+    
+    //color *= Exposure;
+    //color += ExtraBrightness;
     
     color = colorSaturation(color);
     

@@ -1,4 +1,4 @@
-option.TONEMAP=Tonemap
+option.TONEMAP=Tone Map
 
 value.TONEMAP.0=None
 value.TONEMAP.1=BSL
