@@ -1,43 +1,52 @@
 #version 120
 
-#ifndef FOG_MODE
-#define FOG_MODE 2 //0 = Distance based fog (Small performace impact). 1 = Distance based fog with simplex noise (Medium performace impact). 2 = Raymarched fog with simplex noise (Large performace impact) [0 1 2]
+#ifndef TONEMAP
+#define TONEMAP 2 //[0 1 2 3]
+#endif
 
-#include "raymarchFog.glsl"
+#include "lib/postprocessing/tonemappers.glsl"
 
 varying vec2 texCoord;
-
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
-uniform int isEyeInWater;
 
-const vec3 fogColor = vec3(0.9, 0.9, 1.0);
+#define Saturation 1.10
+#define Vibrance 1.00
+
+vec3 colorSaturation(vec3 x){
+	float grayv = (x.r + x.g + x.b) / 3.0;
+	float grays = grayv;
+	if (Saturation < 1.0) grays = dot(x,vec3(0.299, 0.587, 0.114));
+
+	float mn = min(x.r, min(x.g, x.b));
+	float mx = max(x.r, max(x.g, x.b));
+	float sat = (1.0 - (mx - mn)) * (1.0-mx) * grayv * 5.0;
+	vec3 lightness = vec3((mn + mx) * 0.5);
+
+	x = mix(x,mix(x,lightness, 1.0 - Vibrance), sat);
+	x = mix(x, lightness, (1.0 - lightness) * (2.0 - Vibrance) / 2.0 * abs(Vibrance - 1.0));
+
+	return x * Saturation - grays * (Saturation - 1.0);
+}
+
+#define Exposure 1.1
+#define ExtraBrightness 0.05
 
 void main() {
-    // Sample and apply gamma correction
-    vec4 colorSample = texture2D(colortex0, texCoord);
+    vec3 color = texture2D(colortex0, texCoord).rgb;
+    color *= Exposure;
+    color += ExtraBrightness;
+    
+    color = colorSaturation(color);
+    
+	color = pow(color, vec3(2.2));
+    #if TONEMAP == 1
+        color = BSLTonemap(color);
+    #elif TONEMAP == 2
+        color = aces(color);
+    #elif TONEMAP == 3
+        color = filmic(color);
+    #endif
+    color = pow(color, vec3(1/2.2));
 
-    vec4 fogSample;
-    if(isEyeInWater > 0){
-        fogSample = vec4(0.0);
-    }
-    else{
-        #if FOG_MODE == 0
-            fogSample = vec4(SimpleFog(texCoord), 1.0);
-        #elif FOG_MODE == 1
-            fogSample = vec4(SimpleNoiseFog(texCoord), 1.0);
-        #elif FOG_MODE == 2
-            fogSample = vec4(SimpleRayMarchFog(texCoord), 1.0);
-        #endif
-    }
-
-    vec4 result = vec4(mix(colorSample.rgb, fogColor, fogSample.r), colorSample.a);
-
-    gl_FragColor = result;
-
-    // vec3 colorLinear = pow(texture2D(colortex0, texCoord).rgb, vec3(2.2));
-    // colorLinear = aces_tonemap(colorLinear);
-    // vec3 colorGamma = pow(colorLinear, vec3(1/2.2)) - 0.1;
-    //gl_FragColor = vec4(colorGamma, 1.0);
+    gl_FragColor = vec4(color, 1.0);
 }
-#endif

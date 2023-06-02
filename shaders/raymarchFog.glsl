@@ -1,5 +1,10 @@
 
-#include "noise_simplex.glsl"
+#ifndef NOISE_ALGORITHM
+#define NOISE_ALGORITHM 0 //0 = Simplex Noise (Large performance impact). 1 = Flow Noise (Better for lower end hardware) [0 1]
+#endif
+
+#include "lib/noise/noise_simplex.glsl"
+#include "lib/noise/noise_flow.glsl"
 
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
@@ -34,7 +39,13 @@ vec3 SimpleNoiseFog(vec2 texCoord){
     vec3 noisePos = ((cameraPosition * 2.0) + endPos) * 0.1;
     noisePos.x = noisePos.x + (worldTime * timeScale);
     noisePos.y = noisePos.y + (worldTime * timeScale);
-    float simplexValue = snoise(noisePos) * 0.1;
+
+    float simplexValue;
+    #if NOISE_ALGORITHM == 0
+        simplexValue = snoise(noisePos) * 0.1;
+    #else
+        simplexValue = fnoise(noisePos) * 0.1;
+    #endif
 
     float rayLength = length(endPos);
     float fogFactor = exp(-(extinctionCoef * (fogDensity + simplexValue) * rayLength));
@@ -61,14 +72,20 @@ vec3 SimpleRayMarchFog(vec2 texCoord){
 
     vec3 worldPos = (cameraPosition * 1.5) + currentPos;
     vec3 noisePos = worldPos * 0.03;
-    float simplexValue = snoise(noisePos) * 0.1;
+
+    float simplexValue;
+    #if NOISE_ALGORITHM == 0
+        simplexValue = snoise(noisePos) * 0.1;
+    #else
+        simplexValue = fnoise(noisePos) * 0.1;
+    #endif
 
     uint seed = 0x568437adU;
     float result = 0.0;
     for(int i = 0; i < fogSteps; i++){
         noisePos.x = noisePos.x + (worldTime * timeScale);
         noisePos.y = noisePos.y + (worldTime * timeScale);
-        simplexValue = snoise(noisePos) * 0.08;
+        simplexValue = fnoise(noisePos) * 0.08;
 
         float fogValue = (fogDensity / fogSteps) + simplexValue;
 

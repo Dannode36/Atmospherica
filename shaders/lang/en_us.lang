@@ -1,0 +1,6 @@
+option.TONEMAP=Tonemap
+
+value.TONEMAP.0=None
+value.TONEMAP.1=BSL
+value.TONEMAP.2=ACES
+value.TONEMAP.3=Filmic
