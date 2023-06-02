@@ -29,19 +29,19 @@ vec3 colorSaturation(vec3 x){
 	return x * Saturation - grays * (Saturation - 1.0);
 }
 
-#define Exposure 1.1
-#define ExtraBrightness 0.04
+#define Exposure 1.0
+#define ExtraBrightness 0.08
 
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
 
     color = bloom(texCoord);
     
-    //color *= Exposure;
-    //color += ExtraBrightness;
-    
+    color *= Exposure;
+    color += ExtraBrightness;
+
     color = colorSaturation(color);
-    
+
 	color = pow(color, vec3(2.2));
     #if TONEMAP == 1
         color = BSLTonemap(color);

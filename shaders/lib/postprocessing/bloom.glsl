@@ -86,10 +86,10 @@ vec3 bloom(vec2 texCoord){
     for (int ii = 0; ii < TAPS; ++ii) {
         colortmp = texture2D(colortex0, texCoord + poissonDisk[ii] * tapScale).rgb;
         lumtmp = luminance(colortmp);
-        bloomAccumulator += colortmp / clamp(exp((1.0 - lumtmp) * 5.0), 1.0, 100.0) * (1.0 - pow(length(poissonDisk[ii]), 4.0));
+        bloomAccumulator += colortmp / clamp(exp((1.0 - lumtmp) * 5.0), 3.5, 100.0) * (1.0 - pow(length(poissonDisk[ii]), 4.0));
     }
     bloomAccumulator /= float(TAPS);
-    bloomAccumulator *= 0.8;
+    bloomAccumulator *= 3.2;
 
     return color + bloomAccumulator;
 }
