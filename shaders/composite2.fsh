@@ -5,6 +5,12 @@
 
 #include "raymarchFog.glsl"
 
+/*
+const int colortex0Format = RGBA16F;
+const int colortex1Format = RGB16;
+const int colortex2Format = RGB16;
+*/
+
 varying vec2 texCoord;
 
 uniform sampler2D colortex0;

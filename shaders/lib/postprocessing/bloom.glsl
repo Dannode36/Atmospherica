@@ -89,7 +89,7 @@ vec3 bloom(vec2 texCoord){
         bloomAccumulator += colortmp / clamp(exp((1.0 - lumtmp) * 5.0), 3.5, 100.0) * (1.0 - pow(length(poissonDisk[ii]), 4.0));
     }
     bloomAccumulator /= float(TAPS);
-    bloomAccumulator *= 3.2;
+    bloomAccumulator *= 1.5;
 
     return color + bloomAccumulator;
 }

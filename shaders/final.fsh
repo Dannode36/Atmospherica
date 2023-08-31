@@ -6,6 +6,8 @@
 
 varying vec2 texCoord;
 uniform sampler2D colortex0;
+uniform sampler2D colortex1;
+uniform sampler2D colortex2;
 
 #include "lib/postprocessing/tonemappers.glsl"
 #include "lib/postprocessing/bloom.glsl"
@@ -35,22 +37,20 @@ vec3 colorSaturation(vec3 x){
 void main() {
     vec3 color = texture2D(colortex0, texCoord).rgb;
 
-    color = bloom(texCoord);
-    
-    color *= Exposure;
-    color += ExtraBrightness;
+    //color = bloom(texCoord);
 
-    color = colorSaturation(color);
+    // color *= Exposure;
+    // color += ExtraBrightness;
 
-	color = pow(color, vec3(2.2));
-    #if TONEMAP == 1
-        color = BSLTonemap(color);
-    #elif TONEMAP == 2
-        color = aces(color);
-    #elif TONEMAP == 3
-        color = filmic(color);
-    #endif
-    color = pow(color, vec3(1/2.2));
+    //color = colorSaturation(color);
+
+    // #if TONEMAP == 1
+    //     color = BSLTonemap(color);
+    // #elif TONEMAP == 2
+    //     color = aces(color);
+    // #elif TONEMAP == 3
+    //     color = filmic(color);
+    // #endif
 
     gl_FragColor = vec4(color, 1.0);
 }
